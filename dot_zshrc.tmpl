@@ -1,0 +1,38 @@
+# ALIASES
+alias l='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
+alias ll='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
+alias lll='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
+alias rm='trash'
+
+# AUTOCOMPLETE
+# Case-insensitive matching autocomplete
+autoload -Uz compinit && compinit
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+
+# HISTORY
+SAVEHIST=9000
+HISTSIZE=9999
+setopt EXTENDED_HISTORY
+setopt HIST_IGNORE_SPACE
+setopt HIST_NO_STORE
+setopt HIST_REDUCE_BLANKS
+setopt INC_APPEND_HISTORY
+setopt HIST_IGNORE_DUPS
+
+
+{{ if eq .chezmoi.os "darwin" }}
+
+# AUTOSUGGESTIONS
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#808080"
+
+# SYNTAX HIGHLIGHTING
+source ~/Tools/Terminal/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+
+# PYTHON
+# Python environment switching (pyenv)
+eval "$(pyenv init -)"
+if which pyenv-virtualenv-init > /dev/null; then eval "$(pyenv virtualenv-init -)"; fi
+
+export PATH="$PATH:/Users/alexandre/.local/bin"
+{{ end }}
