@@ -19,9 +19,7 @@ setopt HIST_REDUCE_BLANKS
 setopt INC_APPEND_HISTORY
 setopt HIST_IGNORE_DUPS
 
-
 {{ if eq .chezmoi.os "darwin" }}
-
 # AUTOSUGGESTIONS
 source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#808080"
