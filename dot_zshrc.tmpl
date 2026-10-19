@@ -1,15 +1,28 @@
-# ALIASES
-alias l='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
-alias ll='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
-alias lll='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
-alias rm='trash'
+# ENVIRONMENT
+export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
+export PATH="$PATH:$HOME/.local/bin"
 
+{{ if eq .chezmoi.os "linux" -}}
+# SHELL OPTIONS
+HISTFILE=~/.histfile
+setopt autocd extendedglob
+bindkey -e
+
+# OH MY ZSH (runs compinit itself)
+export ZSH="$HOME/.oh-my-zsh"
+HYPHEN_INSENSITIVE="true"
+COMPLETION_WAITING_DOTS="true"
+plugins=(git)
+source $ZSH/oh-my-zsh.sh
+{{- else -}}
 # AUTOCOMPLETE
-# Case-insensitive matching autocomplete
 autoload -Uz compinit && compinit
+{{- end }}
+
+# Case-insensitive matching autocomplete
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 
-# HISTORY
+# HISTORY (after oh-my-zsh, which overrides these)
 SAVEHIST=9000
 HISTSIZE=9999
 setopt EXTENDED_HISTORY
@@ -19,18 +32,44 @@ setopt HIST_REDUCE_BLANKS
 setopt INC_APPEND_HISTORY
 setopt HIST_IGNORE_DUPS
 
-{{ if eq .chezmoi.os "darwin" }}
-# AUTOSUGGESTIONS
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#808080"
+# ALIASES (after oh-my-zsh, which defines its own l/ll)
+alias l='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
+alias ll='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
+alias lll='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
+alias grep='grep --color=auto'
+command -v trash >/dev/null && alias rm='trash'
 
-# SYNTAX HIGHLIGHTING
-source ~/Tools/Terminal/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
-
+{{ if eq .chezmoi.os "darwin" -}}
 # PYTHON
 # Python environment switching (pyenv)
 eval "$(pyenv init -)"
 if which pyenv-virtualenv-init > /dev/null; then eval "$(pyenv virtualenv-init -)"; fi
 
-export PATH="$PATH:/Users/alexandre/.local/bin"
-{{ end }}
+# AUTOSUGGESTIONS
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#808080"
+{{- else if eq .chezmoi.os "linux" -}}
+# AUTOSUGGESTIONS
+[[ -r /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]] &&
+  source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+{{- end }}
+
+# fzf: Ctrl+R history, Ctrl+T files, Alt+C cd
+command -v fzf >/dev/null && source <(fzf --zsh)
+
+# zoxide: smart cd (z <fragment>)
+command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
+
+# PROMPT
+command -v oh-my-posh >/dev/null && eval "$(oh-my-posh init zsh --config catppuccin_latte --strict)"
+
+# MACHINE-LOCAL (untracked: secrets, proxies, etc.)
+[[ -r ~/.zshrc.local ]] && source ~/.zshrc.local
+
+# SYNTAX HIGHLIGHTING (must be last: wraps existing widgets)
+{{ if eq .chezmoi.os "darwin" -}}
+source ~/Tools/Terminal/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+{{- else if eq .chezmoi.os "linux" -}}
+[[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] &&
+  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+{{- end }}
