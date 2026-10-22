@@ -1,15 +1,15 @@
-# ENVIRONMENT VARIABLES
+# === ENVIRONMENT VARIABLES ===
 export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
 export PATH="$PATH:$HOME/.local/bin"
 
-# MACHINE-LOCAL
+
+# === MACHINE-LOCAL ===
 {{ if eq .chezmoi.os "linux" -}}
-[[ -r ~/.zshrc.local ]]
-source ~/.zshrc.local
+[[ -r ~/.zshrc.local ]] && source ~/.zshrc.local
 {{ end}}
 
-# HISTORY
-{{ if eq .chezmoi.os "linux" -}}
+
+# === HISTORY ===
 HISTFILE=~/.histfile
 SAVEHIST=9000
 HISTSIZE=9999
@@ -21,64 +21,67 @@ setopt INC_APPEND_HISTORY
 setopt HIST_IGNORE_DUPS
 setopt autocd extendedglob
 bindkey -e
-{{ end }}
 
-# OH MY ZSH (runs compinit itself)
-{{ if eq .chezmoi.os "linux" -}}
+
+# === ZINIT / OH MY ZSH ===
+{{ if eq .chezmoi.os "darwin" -}}
+source "${HOME}/.zinit/bin/zinit.zsh"
+zinit self-update
+zinit update --all
+
+zinit ice as"command" from"gh-r" bpick"atuin-*.tar.gz" mv"atuin*/atuin -> atuin" atclone"./atuin init zsh > init.zsh; ./atuin gen-completions --shell zsh > _atuin" atpull"%atclone" src"init.zsh"
+zinit light atuinsh/atuin
+
+zinit light zsh-users/zsh-autosuggestions
+zinit light zdharma-continuum/fast-syntax-highlighting
+
+zinit ice wait lucid atinit"source shell/key-bindings.zsh; source shell/completion.zsh"
+zinit light junegunn/fzf
+
+{{- else if eq .chezmoi.os "linux" -}}
 export ZSH="$HOME/.oh-my-zsh"
 HYPHEN_INSENSITIVE="true"
 COMPLETION_WAITING_DOTS="true"
 plugins=(git)
 source $ZSH/oh-my-zsh.sh
-
-{{ else }}
-
-# AUTOCOMPLETE
-autoload -Uz compinit
-compinit
 {{ end }}
 
 
 # AUTOCOMPLETE
-# Case-insensitive matching autocomplete
+autoload -Uz compinit && compinit
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
-
-
-# PYTHON
-# Python environment switching (pyenv)
-{{ if eq .chezmoi.os "darwin" -}}
-eval "$(pyenv init -)"
-if which pyenv-virtualenv-init > /dev/null; then eval "$(pyenv virtualenv-init -)"; fi
-{{- end }}
+zstyle ':completion:*' max-errors 5
 
 
 # AUTOSUGGESTIONS
-{{ if eq .chezmoi.os "darwin" -}}
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#808080"
-
-{{- else if eq .chezmoi.os "linux" -}}
-
-[[ -r /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+{{ if eq .chezmoi.os "linux" -}}
+[[ -r /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 {{- end }}
 
 
 # SYNTAX HIGHLIGHTING
-{{ if eq .chezmoi.os "darwin" -}}
-source ~/Tools/Terminal/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
-{{- else if eq .chezmoi.os "linux" -}}
+{{ if eq .chezmoi.os "linux" -}}
 [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] &&
   source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 {{- end }}
 
 
-# fzf
+# === FZF ===
+{{ if eq .chezmoi.os "linux" -}}
 command -v fzf >/dev/null && source <(fzf --zsh)
+{{- end }}
 
 
-# zoxide
+# === ZOXIDE ===
 command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
+
+
+# === PYTHON ===
+# Python environment switching (pyenv)
+{{ if eq .chezmoi.os "darwin" -}}
+eval "$(pyenv init -)"
+if which pyenv-virtualenv-init > /dev/null; then eval "$(pyenv virtualenv-init -)"; fi
+{{- end }}
 
 
 # ALIASES (after oh-my-zsh, which defines its own l/ll)
