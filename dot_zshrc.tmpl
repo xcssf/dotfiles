@@ -25,8 +25,8 @@ setopt autocd extendedglob
 bindkey -e
 
 
-# === ZINIT / OH MY ZSH ===
-{{ if eq .chezmoi.os "darwin" -}}
+# === ZINIT ===
+{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") -}}
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 if [[ ! -d "$ZINIT_HOME" ]]; then
   if ! command -v git >/dev/null 2>&1; then
@@ -48,31 +48,29 @@ if [[ -r "$ZINIT_HOME/zinit.zsh" ]]; then
   zinit ice as"command" atclone"./install --bin" atpull"%atclone" pick"bin/fzf"
   zinit light junegunn/fzf
 
-  zinit ice as"command" from"gh-r" \
-  bpick"starship-*-apple-darwin.tar.gz" pick"starship" nocompile
+  {{ if eq .chezmoi.os "darwin" -}}
+  zinit ice as"command" from"gh-r" bpick"starship-aarch64-apple-darwin.tar.gz" pick"starship" nocompile
   zinit light starship/starship
+  zinit ice as"command" from"gh-r" bpick"zoxide-*-aarch64-apple-darwin.tar.gz" pick"zoxide" nocompile
+  zinit light ajeetdsouza/zoxide
+  {{ else if eq .chezmoi.os "linux" -}}
+  zinit ice as"command" from"gh-r" bpick"starship-x86_64-unknown-linux-gnu.tar.gz" pick"starship" nocompile
+  zinit light starship/starship
+  zinit ice as"command" from"gh-r" bpick"zoxide-*-x86_64-unknown-linux-musl.tar.gz" pick"zoxide" nocompile
+  zinit light ajeetdsouza/zoxide
+  {{ end -}}
 
   zinit light zsh-users/zsh-autosuggestions
-  zinit ice as"command" from"gh-r" bpick"*apple-darwin.tar.gz" pick"zoxide" nocompile
-  zinit light ajeetdsouza/zoxide
-
 else
-  print -u2 "zsh: Zinit unavailable; plugin-managed Atuin, zoxide, and fzf are disabled"
+  print -u2 "zsh: Zinit unavailable; plugin-managed Atuin, zoxide, Starship, and fzf are disabled"
 fi
-
-{{- else if eq .chezmoi.os "linux" -}}
-export ZSH="$HOME/.oh-my-zsh"
-HYPHEN_INSENSITIVE="true"
-COMPLETION_WAITING_DOTS="true"
-plugins=(git)
-source $ZSH/oh-my-zsh.sh
 {{ end }}
 
 
 # AUTOCOMPLETE
 autoload -Uz compinit
 compinit
-{{ if eq .chezmoi.os "darwin" -}}
+{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") -}}
 if (( $+functions[zinit] )); then
   zinit cdreplay -q
 fi
@@ -80,7 +78,7 @@ fi
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' max-errors 5
 
-{{ if eq .chezmoi.os "darwin" -}}
+{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") -}}
 # Source generated Atuin init after compinit so widgets and completions register.
 if (( $+functions[zinit] )); then
   ATUIN_INIT="${ZINIT[PLUGINS_DIR]}/atuinsh---atuin/init.zsh"
@@ -91,25 +89,6 @@ fi
 if command -v fzf >/dev/null 2>&1; then
   FZF_CTRL_R_COMMAND= source <(fzf --zsh)
 fi
-{{- end }}
-
-
-# AUTOSUGGESTIONS
-{{ if eq .chezmoi.os "linux" -}}
-[[ -r /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-{{- end }}
-
-
-# SYNTAX HIGHLIGHTING
-{{ if eq .chezmoi.os "linux" -}}
-[[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] &&
-  source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-{{- end }}
-
-
-# === FZF ===
-{{ if eq .chezmoi.os "linux" -}}
-command -v fzf >/dev/null 2>&1 && source <(fzf --zsh)
 {{- end }}
 
 
@@ -143,7 +122,7 @@ command -v trash >/dev/null 2>&1 && alias rm='trash'
 
 
 # === ZSH-SYNTAX-HIGHLIGHTING ===
-{{ if eq .chezmoi.os "darwin" -}}
+{{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") -}}
 # Load syntax highlighting last, after other ZLE integrations.
 if (( $+functions[zinit] )); then
   zinit light zdharma-continuum/fast-syntax-highlighting

@@ -2,6 +2,9 @@
 .config/amethyst/
 .config/amethyst/**
 
+.config/opencode/
+.config/opencode/**
+
 .config/sketchybar/
 .config/sketchybar/**
 
@@ -12,6 +15,9 @@
 {{ if eq .chezmoi.os "windows" }}
 .config/amethyst/
 .config/amethyst/**
+
+.config/opencode/
+.config/opencode/**
 
 .config/sketchybar/
 .config/sketchybar/**
