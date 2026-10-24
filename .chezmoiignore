@@ -1,0 +1,21 @@
+{{ if eq .chezmoi.os "linux" }}
+.config/amethyst/
+.config/amethyst/**
+
+.config/sketchybar/
+.config/sketchybar/**
+
+.config/skhd/
+.config/skhd/**
+{{ end }}
+
+{{ if eq .chezmoi.os "windows" }}
+.config/amethyst/
+.config/amethyst/**
+
+.config/sketchybar/
+.config/sketchybar/**
+
+.config/skhd/
+.config/skhd/**
+{{ end }}

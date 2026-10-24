@@ -1,0 +1,158 @@
+#!/bin/bash
+
+get_current_space() {
+  echo "space.$(echo "$INFO" | jq -r '.space')"
+}
+
+item_exists() {
+    #echo "Checking existence of $1"
+    sketchybar --query "$1" >/dev/null 2>&1
+}
+
+if [ "$SENDER" = "space_windows_change" ]; then
+  # Get current space
+  #echo $INFO
+  space=$(get_current_space)
+  
+  # Debug : doing it only on space 1
+  #if [[ $space != "space.3" ]]; then
+  #  exit
+  #fi
+
+  # Get current apps on the current space
+  apps=()
+  while IFS= read -r app; do
+    apps+=("$app")
+  done < <(echo "$INFO" | jq -r '.apps | keys[]?')
+  #echo "--------"
+  #echo "Space : ${space}"
+  #echo "Apps : ${apps[@]}"
+  #echo "Length : ${#apps[@]}"
+
+  # Get current app items on the current space
+  items=()
+  while IFS= read -r line; do
+    items+=("$line")
+  done < <(sketchybar --query bar | jq -r ".items[]? | select(startswith(\"${space}.app.\") and test(\"[0-9]+$\"))")
+  #echo "${items[@]}"
+  #echo "Length : ${#items[@]}"
+  #echo "--------"
+
+  # Remove stale indexed app items deterministically.
+  # Do not rely on the order returned by `sketchybar --query bar`.
+  for item in "${items[@]}"; do
+    index="${item##*.}"
+    if [[ "$index" =~ ^[0-9]+$ ]] && (( index >= ${#apps[@]} )); then
+      #echo "Deleting stale item ${item}"
+      sketchybar --remove "$item"
+    fi
+  done
+  #echo "All items deleted"
+  
+
+  # While there are more apps than items, create new items
+  if [[ ${#apps[@]} -ne 0 ]]; then    # If there are apps to draw
+    #items=()
+    i=0
+    while [[ i -lt ${#apps[@]} ]]; do
+      app=${apps[$i]}
+      item="${space}.app.${i}"
+
+      if ! item_exists "$item"; then
+        #echo "${item} does not exist. Adding one for ${app}"
+        sketchybar --add item "$item" left        # Create the item
+        sketchybar --move "$item" after "$space"  # Move the item after the corresponding "space" item
+        #items+=$item
+      else
+        echo "${item} exists"
+      fi
+      
+      sketchybar --set "$item" \
+        icon.background.drawing=on \
+        icon.background.image="app.${app}"
+      ((i++))
+    done
+  fi
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  # Set already existing items, then depending on if we have more apps or more items, we delete / add 
+
+  # Removing the items who are drawn en trop when we know the amount of apps
+  #while [ ${#apps[@]} -lt ${#items[@]} ]; do
+  #  sketchybar --remove "${array[-1]}"
+  #done
+  
+
+
+
+
+  # Get existing items
+  #items=$(sketchybar --query bar)
+  #items="$(echo $items | jq -r ".items[] | select(. | startswith(\"$1.\"))")"
+  #echo ${items[@]} ##############################################################
+  
+
+  # Removing items with no apps attached (after window closed)
+  #for existing_item in ${existing_items[@]}; do
+  #  echo "Found item : ${existing_item}"
+  #  item_has_an_app=0
+  #  for app in ${apps[@]}; do
+  #    IFS='.' read -r -a parts <<< "$existing_item"
+  #    echo "Comparing ${existing_item} with ${parts[3]}"
+  #    if [[ $app == ${parts[3]} ]]; then
+  #      echo "${existing_item} corresponds to ${app}"
+  #      item_has_an_app=1
+  #    fi
+  #  done
+  #  if [[ $flag -eq 0 ]]; then
+  #    echo "${existing_item} has no app attached, destroying"
+  #    sketchybar --remove "$existing_item"
+  #  fi
+  #done
+
+
+  
+
+  
+  
+
+
+fi
+
+
+
+# Possibilités
+# On window change
+# 
