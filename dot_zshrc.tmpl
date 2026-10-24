@@ -1,5 +1,6 @@
 # === ENVIRONMENT VARIABLES ===
 export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
+export EZA_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/eza"
 typeset -U path PATH
 path+=("$HOME/.local/bin") # Clean PATH when sourcing .zshrc again
 
@@ -44,12 +45,16 @@ if [[ -r "$ZINIT_HOME/zinit.zsh" ]]; then
     atpull"%atclone"
   zinit light atuinsh/atuin
 
+  zinit ice as"command" atclone"./install --bin" atpull"%atclone" pick"bin/fzf"
+  zinit light junegunn/fzf
+
+  zinit ice as"command" from"gh-r" \
+  bpick"starship-*-apple-darwin.tar.gz" pick"starship" nocompile
+  zinit light starship/starship
+
   zinit light zsh-users/zsh-autosuggestions
   zinit ice as"command" from"gh-r" bpick"*apple-darwin.tar.gz" pick"zoxide" nocompile
   zinit light ajeetdsouza/zoxide
-
-  zinit ice as"command" atclone"./install --bin" atpull"%atclone" pick"bin/fzf"
-  zinit light junegunn/fzf
 
 else
   print -u2 "zsh: Zinit unavailable; plugin-managed Atuin, zoxide, and fzf are disabled"
@@ -123,20 +128,21 @@ if command -v pyenv >/dev/null 2>&1; then
 fi
 {{- end }}
 
+# === STARSHIP ===
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
 
-# ALIASES
+
+# === ALIASES ===
 if command -v eza >/dev/null 2>&1; then
   alias l='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
-  alias ll='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
-  alias lll='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
 fi
 alias grep='grep --color=auto'
 command -v trash >/dev/null 2>&1 && alias rm='trash'
 
 
-# PROMPT
-command -v oh-my-posh >/dev/null && eval "$(oh-my-posh init zsh --config catppuccin_latte --strict)"
-
+# === ZSH-SYNTAX-HIGHLIGHTING ===
 {{ if eq .chezmoi.os "darwin" -}}
 # Load syntax highlighting last, after other ZLE integrations.
 if (( $+functions[zinit] )); then
