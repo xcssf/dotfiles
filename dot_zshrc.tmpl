@@ -125,6 +125,19 @@ alias grep='grep --color=auto'
 command -v trash >/dev/null 2>&1 && alias rm='trash'
 
 
+# === KEY BINDINGS ===
+# Apply after plugin integrations. Emacs mode does not bind these terminal
+# sequences by default; an unbound sequence can insert its trailing '~'.
+zmodload zsh/terminfo
+# Standard xterm/Windows Terminal sequences, including legacy Ctrl+Delete.
+bindkey -M emacs '^[[3~' delete-char
+bindkey -M emacs '^[[3;5~' kill-word
+bindkey -M emacs '^[[3^' kill-word
+# Prefer terminal-specific sequences when terminfo provides them.
+[[ -n ${terminfo[kdch1]} ]] && bindkey -M emacs "${terminfo[kdch1]}" delete-char
+[[ -n ${terminfo[kDC5]} ]] && bindkey -M emacs "${terminfo[kDC5]}" kill-word
+
+
 # === ZSH-SYNTAX-HIGHLIGHTING ===
 {{ if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") -}}
 # Load syntax highlighting last, after other ZLE integrations.
