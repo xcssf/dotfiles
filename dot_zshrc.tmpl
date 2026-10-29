@@ -39,11 +39,15 @@ fi
 if [[ -r "$ZINIT_HOME/zinit.zsh" ]]; then
   source "$ZINIT_HOME/zinit.zsh"
 
+<<<<<<< HEAD
+  zinit ice as"command" from"gh-r" bpick"atuin-${$(uname -m)/arm64/aarch64}-*.tar.gz" \
+=======
   {{ if eq .chezmoi.os "darwin" -}}
   zinit ice as"command" from"gh-r" bpick"atuin-aarch64-apple-darwin.tar.gz" \
   {{ else if eq .chezmoi.os "linux" -}}
-  zinit ice as"command" from"gh-r" bpick"atuin-x86_64-unknown-linux-gnu.tar.gz" \
+  zinit ice as"command" from"gh-r" bpick"atuin-${$(uname -m)/arm64/aarch64}-*.tar.gz"
   {{ end -}}
+>>>>>>> 00b95fc078609d1f4cc185f2cb06d041cb1b06d7
     mv"atuin*/atuin -> atuin" \
     atclone"./atuin init zsh > init.zsh; ./atuin gen-completions --shell zsh > _atuin" \
     atpull"%atclone"
