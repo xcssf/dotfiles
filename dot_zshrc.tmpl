@@ -2,8 +2,8 @@
 export OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true
 export EZA_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/eza"
 typeset -U path PATH
-path+=("$HOME/.local/bin") # Clean PATH when sourcing .zshrc again
-
+path+=("$HOME/.local/bin")
+path+=("$HOME/.bun/bin")
 
 # === MACHINE-LOCAL ===
 {{ if eq .chezmoi.os "linux" -}}
@@ -39,7 +39,15 @@ fi
 if [[ -r "$ZINIT_HOME/zinit.zsh" ]]; then
   source "$ZINIT_HOME/zinit.zsh"
 
-  zinit ice as"command" from"gh-r" bpick"atuin-*.tar.gz" \
+<<<<<<< HEAD
+  zinit ice as"command" from"gh-r" bpick"atuin-${$(uname -m)/arm64/aarch64}-*.tar.gz" \
+=======
+  {{ if eq .chezmoi.os "darwin" -}}
+  zinit ice as"command" from"gh-r" bpick"atuin-aarch64-apple-darwin.tar.gz" \
+  {{ else if eq .chezmoi.os "linux" -}}
+  zinit ice as"command" from"gh-r" bpick"atuin-${$(uname -m)/arm64/aarch64}-*.tar.gz"
+  {{ end -}}
+>>>>>>> 00b95fc078609d1f4cc185f2cb06d041cb1b06d7
     mv"atuin*/atuin -> atuin" \
     atclone"./atuin init zsh > init.zsh; ./atuin gen-completions --shell zsh > _atuin" \
     atpull"%atclone"
@@ -119,6 +127,19 @@ if command -v eza >/dev/null 2>&1; then
 fi
 alias grep='grep --color=auto'
 command -v trash >/dev/null 2>&1 && alias rm='trash'
+
+
+# === KEY BINDINGS ===
+# Apply after plugin integrations. Emacs mode does not bind these terminal
+# sequences by default; an unbound sequence can insert its trailing '~'.
+zmodload zsh/terminfo
+# Standard xterm/Windows Terminal sequences, including legacy Ctrl+Delete.
+bindkey -M emacs '^[[3~' delete-char
+bindkey -M emacs '^[[3;5~' kill-word
+bindkey -M emacs '^[[3^' kill-word
+# Prefer terminal-specific sequences when terminfo provides them.
+[[ -n ${terminfo[kdch1]} ]] && bindkey -M emacs "${terminfo[kdch1]}" delete-char
+[[ -n ${terminfo[kDC5]} ]] && bindkey -M emacs "${terminfo[kDC5]}" kill-word
 
 
 # === ZSH-SYNTAX-HIGHLIGHTING ===
