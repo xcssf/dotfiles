@@ -36,44 +36,34 @@ if [[ ! -d "$ZINIT_HOME" ]]; then
   fi
 fi
 
+
+{{- $target := "" -}}
+{{- $zoxideTarget := "" -}}
+{{- if eq .chezmoi.os "linux" -}}
+  {{- $target = "unknown-linux-gnu" -}}
+  {{- $zoxideTarget = "unknown-linux-musl" -}}
+{{- else if eq .chezmoi.os "darwin" -}}
+  {{- $target = "apple-darwin" -}}
+  {{- $zoxideTarget = "apple-darwin" -}}
+{{- end }}
+   
 if [[ -r "$ZINIT_HOME/zinit.zsh" ]]; then
   source "$ZINIT_HOME/zinit.zsh"
-
-<<<<<<< HEAD
-  zinit ice as"command" from"gh-r" bpick"atuin-${$(uname -m)/arm64/aarch64}-*.tar.gz" \
-=======
-  {{ if eq .chezmoi.os "darwin" -}}
-  zinit ice as"command" from"gh-r" bpick"atuin-aarch64-apple-darwin.tar.gz" \
-  {{ else if eq .chezmoi.os "linux" -}}
-  zinit ice as"command" from"gh-r" bpick"atuin-${$(uname -m)/arm64/aarch64}-*.tar.gz"
-  {{ end -}}
->>>>>>> 00b95fc078609d1f4cc185f2cb06d041cb1b06d7
-    mv"atuin*/atuin -> atuin" \
-    atclone"./atuin init zsh > init.zsh; ./atuin gen-completions --shell zsh > _atuin" \
-    atpull"%atclone"
+  _zinit_arch="${$(uname -m)/arm64/aarch64}"
+  zinit ice as"command" from"gh-r" bpick"atuin-${_zinit_arch}-{{ $target }}.tar.gz" mv"atuin*/atuin -> atuin" pick"atuin" atclone"./atuin init zsh > init.zsh; ./atuin gen-completions --shell zsh > _atuin" atpull"%atclone"
   zinit light atuinsh/atuin
-
   zinit ice as"command" atclone"./install --bin" atpull"%atclone" pick"bin/fzf"
   zinit light junegunn/fzf
-
-  {{ if eq .chezmoi.os "darwin" -}}
-  zinit ice as"command" from"gh-r" bpick"starship-aarch64-apple-darwin.tar.gz" pick"starship" nocompile
+  zinit ice as"command" from"gh-r" bpick"starship-${_zinit_arch}-{{ $target }}.tar.gz" pick"starship" nocompile
   zinit light starship/starship
-  zinit ice as"command" from"gh-r" bpick"zoxide-*-aarch64-apple-darwin.tar.gz" pick"zoxide" nocompile
+  zinit ice as"command" from"gh-r" bpick"zoxide-*-${_zinit_arch}-{{ $zoxideTarget }}.tar.gz" pick"zoxide" nocompile
   zinit light ajeetdsouza/zoxide
-  {{ else if eq .chezmoi.os "linux" -}}
-  zinit ice as"command" from"gh-r" bpick"starship-x86_64-unknown-linux-gnu.tar.gz" pick"starship" nocompile
-  zinit light starship/starship
-  zinit ice as"command" from"gh-r" bpick"zoxide-*-x86_64-unknown-linux-musl.tar.gz" pick"zoxide" nocompile
-  zinit light ajeetdsouza/zoxide
-  {{ end -}}
-
   zinit light zsh-users/zsh-autosuggestions
+  unset _zinit_arch
 else
   print -u2 "zsh: Zinit unavailable; plugin-managed Atuin, zoxide, Starship, and fzf are disabled"
 fi
 {{ end }}
-
 
 # AUTOCOMPLETE
 autoload -Uz compinit
