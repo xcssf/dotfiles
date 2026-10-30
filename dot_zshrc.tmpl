@@ -113,9 +113,10 @@ fi
 
 # === ALIASES ===
 if command -v eza >/dev/null 2>&1; then
-  alias l='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git -h'
+  alias l='eza --color=always --color-scale=all --color-scale-mode=gradient --icons=always --group-directories-first -a -l --git'
 fi
 alias grep='grep --color=auto'
+alias cd='z'
 command -v trash >/dev/null 2>&1 && alias rm='trash'
 
 
